@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+const fs = require('fs')
+const assert = require('assert')
+
+const RESULTS_FILE_PATH = 'results.json'
+
+const data = JSON.parse(fs.readFileSync(RESULTS_FILE_PATH, {encoding: 'utf8'}))
+Object.keys(data).forEach((tile) => {
+  const results = data[tile]
+  Object.keys(results).forEach((algorithm) => {
+    const result = results[algorithm]
+    console.log(`validating ${tile} ${algorithm}`)
+    if (result.status === true) assert(result.path.length === 100, 'successful path must have 100 tiles')
+    assert.equal(uniq(result.path).length, result.path.length, 'all tiles in path must be unique')
+    const path = result.path.map(parseTile)
+    path.forEach((tile) => {
+      assert(tileIsOnBoard(tile), `tile must be on the board ${JSON.stringify(tile)}`)
+    })
+    for (let i = 1; i < path.length; ++i) {
+      const fromTile = path[i - 1]
+      const toTile = path[i]
+      assert(validMove(fromTile, toTile), `move is not valid ${JSON.stringify(fromTile)} - ${JSON.stringify(toTile)}`)
+    }
+  })
+})
+
+function tileIsOnBoard(tile) {
+  return tile.x >= 0 && tile.x <= 9 && tile.y >= 0 && tile.y <= 9
+}
+
+function uniq(array) {
+  return Array.from(new Set(array))
+}
+
+function parseTile(tileString) {
+  const [x, y] = tileString.split(',').map(v => parseInt(v))
+  return {x, y}
+}
+
+function validMove(from, to) {
+  return (to.x === from.x && to.y === from.y - 3) || // (N)
+         (to.x === from.x + 2 && to.y === from.y - 2) || // (NE)
+         (to.x === from.x + 3 && to.y === from.y) || // (E)
+         (to.x === from.x + 2 && to.y === from.y + 2) || // (SE)
+         (to.x === from.x && to.y === from.y + 3) || // (S)
+         (to.x === from.x - 2 && to.y === from.y + 2) || // (SW)
+         (to.x === from.x - 3 && to.y === from.y) || // (W)
+         (to.x === from.x - 2 && to.y === from.y - 2) // (NW)
+}

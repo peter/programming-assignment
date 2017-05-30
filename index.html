@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Programming Assignment</title>
+</head>
+<body>
+	<h1>Programming Assignment</h1>
+
+	<table>
+		<tbody>
+			<tr class="y0">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y1">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y2">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y3">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y4">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y5">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y6">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y7">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y8">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+
+			<tr class="y9">
+				<td class="x0"></td>
+				<td class="x1"></td>
+				<td class="x2"></td>
+				<td class="x3"></td>
+				<td class="x4"></td>
+				<td class="x5"></td>
+				<td class="x6"></td>
+				<td class="x7"></td>
+				<td class="x8"></td>
+				<td class="x9"></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<style type="text/css">
+		table, th, td {
+   			border: 1px solid black;
+		}
+
+		td {
+			width: 30px;
+			height: 30px;
+			text-align: center;
+			background-color: #c4c5c6;
+		}
+
+		td.visited {
+			background-color: #4286f4;
+		}
+	</style>
+
+	<script type="text/javascript">
+		function selectTile(x, y) {
+			return document.getElementsByTagName('tr')[y].children[x]
+		}
+
+		function drawTile(el, index, tile) {
+			const VISITED_CLASS = 'visited'
+			if (index == null) {
+				el.classList.remove(VISITED_CLASS)
+				el.innerHTML = `(${tile.x},${tile.y})`
+			} else {
+				el.classList.add(VISITED_CLASS)
+				el.innerHTML = `${index} (${tile.x},${tile.y})`
+			}
+		}
+
+		function clearTable() {
+			for (let y = 0; y < 10; ++y) {
+				for (let x = 0; x < 10; ++x) {
+					const el = selectTile(x, y)
+					drawTile(el, null, {x, y})
+				}
+			}
+		}
+
+		function drawTable(path) {
+			for (let i = 0; i < path.length; ++i) {
+				const tile = path[i]
+				const el = selectTile(tile.x, tile.y)
+				setTimeout(() => drawTile(el, i, tile), i*100)
+			}
+		}
+
+    function throttle(fn, threshhold, scope) {
+      threshhold || (threshhold = 250);
+      var last,
+          deferTimer;
+      return function () {
+        var context = scope || this;
+
+        var now = +new Date,
+            args = arguments;
+        if (last && now < last + threshhold) {
+          // hold on to it
+          clearTimeout(deferTimer);
+          deferTimer = setTimeout(function () {
+            last = now;
+            fn.apply(context, args);
+          }, threshhold);
+        } else {
+          last = now;
+          fn.apply(context, args);
+        }
+      };
+    }
+
+		function updateTable(path) {
+			clearTable()
+			drawTable(path)
+		}
+	</script>
+
+  <script type="text/javascript">
+    function parseTile(tileString) {
+      const [x, y] = tileString.split(',').map(n => parseInt(n))
+      return {x, y}
+    }
+
+    function tileString(tile) {
+      return [tile.x, tile.y].join(',')
+    }
+
+    function repeat(value, length) {
+      return Array(length).fill(value)
+    }
+
+    function compose(fns) {
+      return function(arg) {
+        return fns.reverse().reduce(function(result, fn) {
+          return fn(result)
+        }, arg)
+      }
+    }
+
+    function uniq(array) {
+      return Array.from(new Set(array))
+    }
+
+    function rotate90(tile) {
+      return {
+        x: 9 - tile.y,
+        y: tile.x
+      }
+    }
+
+    const rotate180 = compose(repeat(rotate90, 2))
+    const rotate270 = compose(repeat(rotate90, 3))
+
+    const PATHS = {
+      '0,0': [{"x":0,"y":0},{"x":3,"y":0},{"x":6,"y":0},{"x":9,"y":0},{"x":9,"y":3},{"x":9,"y":6},{"x":9,"y":9},{"x":6,"y":9},{"x":3,"y":9},{"x":0,"y":9},{"x":0,"y":6},{"x":0,"y":3},{"x":2,"y":1},{"x":5,"y":1},{"x":8,"y":1},{"x":8,"y":4},{"x":8,"y":7},{"x":5,"y":7},{"x":2,"y":7},{"x":0,"y":5},{"x":0,"y":2},{"x":2,"y":0},{"x":5,"y":0},{"x":8,"y":0},{"x":8,"y":3},{"x":8,"y":6},{"x":8,"y":9},{"x":5,"y":9},{"x":2,"y":9},{"x":0,"y":7},{"x":0,"y":4},{"x":0,"y":1},{"x":3,"y":1},{"x":6,"y":1},{"x":9,"y":1},{"x":9,"y":4},{"x":9,"y":7},{"x":7,"y":9},{"x":4,"y":9},{"x":1,"y":9},{"x":1,"y":6},{"x":1,"y":3},{"x":1,"y":0},{"x":4,"y":0},{"x":7,"y":0},{"x":9,"y":2},{"x":9,"y":5},{"x":9,"y":8},{"x":6,"y":8},{"x":3,"y":8},{"x":0,"y":8},{"x":2,"y":6},{"x":4,"y":4},{"x":6,"y":2},{"x":6,"y":5},{"x":4,"y":7},{"x":1,"y":7},{"x":1,"y":4},{"x":1,"y":1},{"x":4,"y":1},{"x":7,"y":1},{"x":7,"y":4},{"x":7,"y":7},{"x":5,"y":5},{"x":3,"y":3},{"x":6,"y":3},{"x":8,"y":5},{"x":8,"y":8},{"x":5,"y":8},{"x":2,"y":8},{"x":2,"y":5},{"x":2,"y":2},{"x":5,"y":2},{"x":8,"y":2},{"x":6,"y":4},{"x":6,"y":7},{"x":3,"y":7},{"x":1,"y":5},{"x":1,"y":2},{"x":3,"y":4},{"x":5,"y":6},{"x":7,"y":8},{"x":7,"y":5},{"x":7,"y":2},{"x":4,"y":2},{"x":2,"y":4},{"x":4,"y":6},{"x":4,"y":3},{"x":7,"y":3},{"x":7,"y":6},{"x":5,"y":4},{"x":3,"y":2},{"x":3,"y":5},{"x":5,"y":3},{"x":2,"y":3},{"x":4,"y":5},{"x":4,"y":8},{"x":1,"y":8},{"x":3,"y":6},{"x":6,"y":6}],
+      '1,0': [{"x":1,"y":0},{"x":4,"y":0},{"x":7,"y":0},{"x":9,"y":2},{"x":9,"y":5},{"x":9,"y":8},{"x":6,"y":8},{"x":3,"y":8},{"x":0,"y":8},{"x":0,"y":5},{"x":0,"y":2},{"x":2,"y":0},{"x":5,"y":0},{"x":8,"y":0},{"x":8,"y":3},{"x":8,"y":6},{"x":8,"y":9},{"x":5,"y":9},{"x":2,"y":9},{"x":0,"y":7},{"x":0,"y":4},{"x":0,"y":1},{"x":3,"y":1},{"x":6,"y":1},{"x":9,"y":1},{"x":9,"y":4},{"x":9,"y":7},{"x":7,"y":9},{"x":4,"y":9},{"x":1,"y":9},{"x":1,"y":6},{"x":1,"y":3},{"x":4,"y":3},{"x":7,"y":3},{"x":7,"y":6},{"x":5,"y":8},{"x":2,"y":8},{"x":0,"y":6},{"x":0,"y":3},{"x":0,"y":0},{"x":3,"y":0},{"x":6,"y":0},{"x":9,"y":0},{"x":9,"y":3},{"x":9,"y":6},{"x":9,"y":9},{"x":6,"y":9},{"x":3,"y":9},{"x":0,"y":9},{"x":2,"y":7},{"x":4,"y":5},{"x":6,"y":3},{"x":8,"y":1},{"x":8,"y":4},{"x":8,"y":7},{"x":5,"y":7},{"x":3,"y":5},{"x":3,"y":2},{"x":6,"y":2},{"x":6,"y":5},{"x":4,"y":7},{"x":1,"y":7},{"x":1,"y":4},{"x":1,"y":1},{"x":4,"y":1},{"x":7,"y":1},{"x":7,"y":4},{"x":7,"y":7},{"x":5,"y":5},{"x":3,"y":3},{"x":5,"y":1},{"x":2,"y":1},{"x":2,"y":4},{"x":4,"y":6},{"x":6,"y":4},{"x":8,"y":2},{"x":5,"y":2},{"x":3,"y":4},{"x":5,"y":6},{"x":7,"y":8},{"x":7,"y":5},{"x":5,"y":3},{"x":2,"y":3},{"x":2,"y":6},{"x":4,"y":8},{"x":1,"y":8},{"x":3,"y":6},{"x":5,"y":4},{"x":7,"y":2},{"x":4,"y":2},{"x":1,"y":2},{"x":1,"y":5},{"x":3,"y":7},{"x":6,"y":7},{"x":8,"y":5},{"x":8,"y":8},{"x":6,"y":6},{"x":4,"y":4},{"x":2,"y":2},{"x":2,"y":5}],
+      '2,2': [{"x":2,"y":2},{"x":4,"y":0},{"x":7,"y":0},{"x":9,"y":2},{"x":9,"y":5},{"x":9,"y":8},{"x":6,"y":8},{"x":3,"y":8},{"x":0,"y":8},{"x":0,"y":5},{"x":0,"y":2},{"x":2,"y":0},{"x":5,"y":0},{"x":8,"y":0},{"x":8,"y":3},{"x":8,"y":6},{"x":8,"y":9},{"x":5,"y":9},{"x":2,"y":9},{"x":0,"y":7},{"x":0,"y":4},{"x":0,"y":1},{"x":3,"y":1},{"x":6,"y":1},{"x":9,"y":1},{"x":9,"y":4},{"x":9,"y":7},{"x":7,"y":9},{"x":4,"y":9},{"x":1,"y":9},{"x":1,"y":6},{"x":1,"y":3},{"x":1,"y":0},{"x":3,"y":2},{"x":5,"y":4},{"x":7,"y":6},{"x":5,"y":8},{"x":2,"y":8},{"x":0,"y":6},{"x":0,"y":3},{"x":0,"y":0},{"x":3,"y":0},{"x":6,"y":0},{"x":9,"y":0},{"x":9,"y":3},{"x":9,"y":6},{"x":9,"y":9},{"x":6,"y":9},{"x":3,"y":9},{"x":0,"y":9},{"x":2,"y":7},{"x":4,"y":5},{"x":6,"y":3},{"x":8,"y":1},{"x":8,"y":4},{"x":8,"y":7},{"x":5,"y":7},{"x":3,"y":5},{"x":5,"y":3},{"x":7,"y":1},{"x":7,"y":4},{"x":7,"y":7},{"x":4,"y":7},{"x":1,"y":7},{"x":1,"y":4},{"x":1,"y":1},{"x":4,"y":1},{"x":4,"y":4},{"x":6,"y":2},{"x":6,"y":5},{"x":4,"y":3},{"x":2,"y":5},{"x":5,"y":5},{"x":7,"y":3},{"x":5,"y":1},{"x":2,"y":1},{"x":2,"y":4},{"x":4,"y":6},{"x":6,"y":4},{"x":8,"y":2},{"x":5,"y":2},{"x":3,"y":4},{"x":3,"y":7},{"x":6,"y":7},{"x":8,"y":5},{"x":8,"y":8},{"x":6,"y":6},{"x":4,"y":8},{"x":1,"y":8},{"x":3,"y":6},{"x":3,"y":3},{"x":1,"y":5},{"x":1,"y":2},{"x":4,"y":2},{"x":7,"y":2},{"x":7,"y":5},{"x":7,"y":8},{"x":5,"y":6},{"x":2,"y":6},{"x":2,"y":3}],
+      '0,9': [{"x":0,"y":9},{"x":0,"y":6},{"x":0,"y":3},{"x":0,"y":0},{"x":3,"y":0},{"x":6,"y":0},{"x":9,"y":0},{"x":9,"y":3},{"x":9,"y":6},{"x":9,"y":9},{"x":6,"y":9},{"x":3,"y":9},{"x":1,"y":7},{"x":1,"y":4},{"x":1,"y":1},{"x":4,"y":1},{"x":7,"y":1},{"x":7,"y":4},{"x":7,"y":7},{"x":5,"y":9},{"x":2,"y":9},{"x":0,"y":7},{"x":0,"y":4},{"x":0,"y":1},{"x":3,"y":1},{"x":6,"y":1},{"x":9,"y":1},{"x":9,"y":4},{"x":9,"y":7},{"x":7,"y":9},{"x":4,"y":9},{"x":1,"y":9},{"x":1,"y":6},{"x":1,"y":3},{"x":1,"y":0},{"x":4,"y":0},{"x":7,"y":0},{"x":9,"y":2},{"x":9,"y":5},{"x":9,"y":8},{"x":6,"y":8},{"x":3,"y":8},{"x":0,"y":8},{"x":0,"y":5},{"x":0,"y":2},{"x":2,"y":0},{"x":5,"y":0},{"x":8,"y":0},{"x":8,"y":3},{"x":8,"y":6},{"x":8,"y":9},{"x":6,"y":7},{"x":4,"y":5},{"x":2,"y":3},{"x":5,"y":3},{"x":7,"y":5},{"x":7,"y":8},{"x":4,"y":8},{"x":1,"y":8},{"x":1,"y":5},{"x":1,"y":2},{"x":4,"y":2},{"x":7,"y":2},{"x":5,"y":4},{"x":3,"y":6},{"x":3,"y":3},{"x":5,"y":1},{"x":8,"y":1},{"x":8,"y":4},{"x":8,"y":7},{"x":5,"y":7},{"x":2,"y":7},{"x":2,"y":4},{"x":2,"y":1},{"x":4,"y":3},{"x":7,"y":3},{"x":7,"y":6},{"x":5,"y":8},{"x":2,"y":8},{"x":4,"y":6},{"x":6,"y":4},{"x":8,"y":2},{"x":5,"y":2},{"x":2,"y":2},{"x":2,"y":5},{"x":4,"y":7},{"x":6,"y":5},{"x":3,"y":5},{"x":3,"y":2},{"x":6,"y":2},{"x":4,"y":4},{"x":2,"y":6},{"x":5,"y":6},{"x":3,"y":4},{"x":3,"y":7},{"x":5,"y":5},{"x":8,"y":5},{"x":8,"y":8},{"x":6,"y":6},{"x":6,"y":3}]
+    }
+
+    const NORTH_SUCCESS_TILES = [
+      '0,0',
+      '0,1',
+      '0,2',
+      '0,4',
+      '0,7',
+      '0,8',
+      '0,9',
+      '1,0',
+      '1,1',
+      '1,3',
+      '1,4',
+      '1,5',
+      '1,7',
+      '1,8',
+      '1,9',
+      '2,0',
+      '2,1',
+      '2,2',
+      '2,3',
+      '2,4',
+      '2,5',
+      '2,7',
+      '2,8',
+      '3,2',
+      '3,3',
+      '3,4',
+      '3,5',
+      '3,6',
+      '3,7',
+      '4,1',
+      '4,3',
+      '4,4',
+      '4,6',
+      '4,8',
+      '4,9',
+      '5,0',
+      '5,1',
+      '5,2',
+      '5,3',
+      '6,1',
+      '6,2',
+      '6,3',
+      '6,5',
+      '6,6',
+      '6,7',
+      '6,8',
+      '6,9',
+      '7,0',
+      '7,2',
+      '7,3',
+      '7,5',
+      '7,6',
+      '7,8',
+      '8,0',
+      '8,1',
+      '8,2',
+      '8,3',
+      '8,4',
+      '8,7',
+      '8,8',
+      '8,9',
+      '9,0',
+      '9,1',
+      '9,2',
+      '9,8'
+    ].map(parseTile)
+
+    const WEST_SUCCESS_TILES = NORTH_SUCCESS_TILES.map(rotate90)
+    const SOUTH_SUCCESS_TILES = NORTH_SUCCESS_TILES.map(rotate180)
+    const EAST_SUCCESS_TILES = NORTH_SUCCESS_TILES.map(rotate270)
+
+    const ALL_SUCCESS_TILES = uniq(Array.prototype.concat.apply([],
+                                                     [NORTH_SUCCESS_TILES,
+                                                      WEST_SUCCESS_TILES,
+                                                      SOUTH_SUCCESS_TILES,
+                                                      EAST_SUCCESS_TILES]).map(tileString)).map(parseTile)
+
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+      updateTable(PATHS['0,0'])
+    });
+  </script>
+</body>
+</html>

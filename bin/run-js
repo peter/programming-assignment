@@ -1,0 +1,277 @@
+#!/usr/bin/env node --harmony_tailcalls --use-strict
+//
+// Usage:
+//
+// bin/run-js [start-tile-coordinates] [start-direction] [rotation]
+//
+// If no start tile coordinates are given then all start tiles will
+// be looped through. Example with only one start tile:
+//
+// bin/run-js 0,0
+//
+// You can also specify "all" as start tile. The start direction
+// can be one of N, NW, W, SW, S, SE, E, NE. Example:
+//
+// bin/run-js all S
+//
+// Rotation can be set to "clockwise" or "anticlockwise".
+//
+// If start direction and rotation are not specified the script will look at any
+// previous results for the start tile in results.json and pick the direction/rotation
+// combination with the smallest number of iterations.
+//
+// If a successful path could be found it is output to stdout and saved
+// in results.json
+
+const fs = require('fs')
+
+/////////////////////////////////////////////////////////////
+//
+// Global variables
+//
+/////////////////////////////////////////////////////////////
+
+const MOVES = {
+  N: {x: 0, y: -3, angle: 0},
+  NE: {x: 2, y: -2, angle: 45},
+  E: {x: 3, y: 0, angle: 90},
+  SE: {x: 2, y: 2, angle: 135},
+  S: {x: 0, y: 3, angle: 180},
+  SW: {x: -2, y: 2, angle: 225},
+  W: {x: -3, y: 0, angle: 270},
+  NW: {x: -2, y: -2, angle: 315}
+}
+
+let MOVES_LIST
+let ROTATION
+let iterations
+const MAX_ITERATIONS = process.env['MAX_ITERATIONS'] || 1000000
+let maxLength
+const RESULTS_FILE_PATH = 'results.json'
+const DEFAULT_DIRECTION = 'N'
+const DEFAULT_ROTATION = 'clockwise'
+
+/////////////////////////////////////////////////////////////
+//
+// Main script
+//
+/////////////////////////////////////////////////////////////
+
+startTiles(process.argv[2]).forEach(tile => {
+  try {
+    iterations = 0
+    maxLength = 0
+    const specifiedDirection = process.argv[3] && process.argv[3].toUpperCase()
+    const specifiedRotation = process.argv[4]
+    const [bestDirection, bestRotation] = selectDirectionAndRotation(tile)
+    let direction = specifiedDirection || DEFAULT_DIRECTION
+    ROTATION = specifiedRotation || DEFAULT_ROTATION
+    if (specifiedDirection == null && specifiedRotation == null) {
+      direction = bestDirection
+      ROTATION = bestRotation
+    }
+    MOVES_LIST = movesList(direction)
+    console.log(`\nStart tile: ${JSON.stringify(tile)} ${direction}:${ROTATION} (${bestDirection}:${bestRotation})`)
+    console.log('-----------------------------------------------')
+    const initialPath = appendPath(null, tile)
+    const path = findPath(initialPath)
+    console.log(`iterations=${iterations} path=${JSON.stringify(path)}`)
+    saveResults(direction, ROTATION, path)
+  } catch (e) {
+    console.error(e)
+  }
+})
+
+/////////////////////////////////////////////////////////////
+//
+// Functions
+//
+/////////////////////////////////////////////////////////////
+
+function findPath(path) {
+  if (path.length > maxLength) {
+    maxLength = path.length
+    // console.log('debug maxLength', maxLength, iterations, tileString(path[0]))
+  }
+  const moves = sortMoves(path, allowedMoves(path))
+  // if (moves.length === 0) console.log('debug dead end', path.length, currentTile(path))
+  for (let i = 0; i < moves.length; ++i) {
+    const tile = nextTile(currentTile(path), moves[i])
+    const nextPath = appendPath(path, tile)
+    iterations = iterations + 1
+    if (iterations >= MAX_ITERATIONS) {
+      console.error(`MAX_ITERATIONS=${MAX_ITERATIONS} reached with length=${path.length} path=${JSON.stringify(path)}`)
+      return path
+    }
+    // console.log('debug', path.length, maxLength, iterations, i, currentTile(path), moves[i], tile)
+    const foundPath = findPath(nextPath)
+    if (gameIsComplete(foundPath)) {
+      return foundPath
+    }
+  }
+  return path
+}
+
+function startTiles(tileString) {
+  if (tileString && tileString !== 'all') {
+    return [parseTile(tileString)]
+  } else {
+    return allTiles()
+  }
+}
+
+// Returns the direction that has the fewest iterations for tile in previous results
+function selectDirectionAndRotation(tile) {
+  const results = readResults()[tileString(tile)] || {}
+  const key = Object.keys(results).sort((k1, k2) => {
+    const i1 = (results[k1] ? results[k1]['iterations'] : MAX_ITERATIONS)
+    const i2 = (results[k2] ? results[k2]['iterations'] : MAX_ITERATIONS)
+    return i1 - i2
+  })[0]
+  return key ? parseResultsKey(key) : ['N', 'clockwise']
+}
+
+function movesList(direction) {
+  const moves = Object.values(MOVES)
+  if (direction === 'N') {
+   return moves
+  } else {
+   const index = moves.findIndex(move => move === MOVES[direction])
+   return moves.slice(index).concat(moves.slice(0, index)).map((move, i) => {
+     const angle = i * 45
+     return Object.assign({}, move, {angle})
+   })
+  }
+}
+
+function allTiles() {
+  return range(100).map(n => {
+    return {
+      x: (n % 10),
+      y: Math.floor(n / 10)
+    }
+  })
+}
+
+function range(length) {
+  return [...Array(length).keys()]
+}
+
+function nextTile(tile, move) {
+  return {
+    x: tile.x + move.x,
+    y: tile.y + move.y
+  }
+}
+
+function sortMoves(path, moves) {
+  const currentTile = path[path.length - 1]
+  const previousTile = path[path.length - 2]
+  if (previousTile) {
+    const previousMove = findMove(previousTile, currentTile)
+    if (ROTATION === 'clockwise') {
+      const clockwise = moves.filter(move => move.angle >= previousMove.angle)
+      const antiClockwise = moves.filter(move => move.angle < previousMove.angle)
+      return clockwise.concat(antiClockwise)
+    } else if (ROTATION === 'anticlockwise') {
+      const antiClockwise = moves.filter(move => move.angle <= previousMove.angle).reverse()
+      const clockwise = moves.filter(move => move.angle > previousMove.angle).reverse()
+      return antiClockwise.concat(clockwise)
+    } else {
+      throw new Error(`Unsupported rotation ${ROTATION}`)
+    }
+  }
+  return moves // fallback
+}
+
+function findMove(fromTile, toTile) {
+  const move = {
+    x: (toTile.x - fromTile.x),
+    y: (toTile.y - fromTile.y)
+  }
+  return MOVES_LIST.find(m => movesEq(move, m))
+}
+
+function movesEq(move1, move2) {
+  return move1.x === move2.x && move1.y === move2.y
+}
+
+function allowedMoves(path) {
+  return MOVES_LIST.filter(move => moveIsAllowed(path, move))
+}
+
+function shuffle(a) {
+  for (let i = a.length; i; i--) {
+      let j = Math.floor(Math.random() * i);
+      [a[i - 1], a[j]] = [a[j], a[i - 1]];
+  }
+  return a
+}
+
+function moveIsAllowed(path, move) {
+  const tile = nextTile(currentTile(path), move)
+  return tileIsOnBoard(tile) && !tileVisited(path, tile)
+}
+
+function tileIsOnBoard(tile) {
+  return tile.x >= 0 && tile.x <= 9 && tile.y >= 0 && tile.y <= 9
+}
+
+function parseTile(tileString) {
+  const [x, y] = tileString.split(',').map(n => parseInt(n))
+  return {x, y}
+}
+
+function tileString(tile) {
+  return [tile.x, tile.y].join(',')
+}
+
+function resultsKey(direction, rotation) {
+  return [direction, rotation].join(':')
+}
+
+function parseResultsKey(resultsKey) {
+  return resultsKey.split(':')
+}
+
+function saveResults(direction, rotation, path) {
+  let results = readResults()
+  const success = (path.length === 100)
+  const pathKey = tileString(path[0])
+  const subKey = resultsKey(direction, rotation)
+  results[pathKey] = results[pathKey] || {}
+  results[pathKey][subKey] = {
+    iterations,
+    success,
+    path: path.map(tileString),
+    time: new Date()}
+  fs.writeFileSync(RESULTS_FILE_PATH, JSON.stringify(results, null, 4))
+}
+
+function readResults() {
+  if (fs.existsSync(RESULTS_FILE_PATH)) {
+    return JSON.parse(fs.readFileSync(RESULTS_FILE_PATH, {encoding: 'utf8'}))
+  } else {
+    return {}
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// Functions dependant on data structure used for path
+/////////////////////////////////////////////////////////////
+
+function tileVisited(path, tile) {
+  return path.find(t => t.x === tile.x && t.y === tile.y)
+}
+
+function currentTile(path) {
+  return path[path.length - 1]
+}
+
+function appendPath(path, tile) {
+  return (path || []).concat([tile])
+}
+
+function gameIsComplete(path) {
+  return path && path.length === 100
+}
